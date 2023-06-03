@@ -20,11 +20,10 @@
     <main>
         {{template "main" .}}
     </main>
-    <footer>Powered by <a href='https://golang.org/'>Go</a></footer>
+    <footer>Powered by <a href='https://golang.org/'>Go</a> © {{.CurrentYear}}</footer>
     <!-- And include the JavaScript file -->
     <script src="/static/js/main.js" type="text/javascript"></script>
 </body>
 
 </html>
 {{end}}
-Make su

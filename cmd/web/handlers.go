@@ -14,35 +14,17 @@ func (app *application) home(w http.ResponseWriter, r *http.Request) {
 		http.NotFound(w, r)
 		return
 	}
-	// // w.Write([]byte("Hello from Snippetbox"))
-	// files := []string{
-	// 	"./ui/html/pages/base.go.tpl",
-	// 	"./ui/html/pages/home.go.tpl",
-	// 	"./ui/html/partials/nav.o.tpl",
-	// }
-
-	// ts, err := template.ParseFiles(files...)
-
-	// if err != nil {
-	// 	app.serverError(w, err)
-	// 	return
-	// }
-
-	// err = ts.ExecuteTemplate(w, "base", nil
-	// if err != nil {
-	// 	app.serverError(w, err)
-	// 	return
-	// }
 
 	snippets, err := app.snippets.Latest()
 	if err != nil {
 		app.serverError(w, err)
 	}
 
-	for _, snippet := range snippets {
-		fmt.Fprintf(w, "%v\n", *snippet)
-	}
+	//Template data
+	data := app.newTemplateData()
+	data.Snippets = snippets
 
+	app.render(w, http.StatusOK, "home.go.tpl", data)
 }
 
 func (app *application) snippetView(w http.ResponseWriter, r *http.Request) {
@@ -63,7 +45,12 @@ func (app *application) snippetView(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	fmt.Fprintf(w, "%v", *snippet)
+	//Template data
+	data := app.newTemplateData()
+	data.Snippet = snippet
+
+	app.render(w, http.StatusOK, "view.go.tpl", data)
+
 }
 
 func (app *application) snippetCreate(w http.ResponseWriter, r *http.Request) {
@@ -84,5 +71,4 @@ func (app *application) snippetCreate(w http.ResponseWriter, r *http.Request) {
 	}
 
 	http.Redirect(w, r, fmt.Sprintf("/snippet/view?id=%d", id), http.StatusSeeOther)
-	// w.Write([]byte("Create a new snippet..."))
 }
