@@ -44,7 +44,7 @@ func (app *application) render(w http.ResponseWriter, status int, page string, d
 		app.serverError(w, err)
 		return
 	}
-
+	w.WriteHeader(status)
 	buff.WriteTo(w)
 }
 
