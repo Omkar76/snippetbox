@@ -5,6 +5,8 @@ import (
 	"fmt"
 	"net/http"
 	"strconv"
+	"strings"
+	"unicode/utf8"
 
 	"github.com/Omkar76/snippetbox/internal/models"
 	"github.com/julienschmidt/httprouter"
@@ -50,6 +52,13 @@ func (app *application) snippetView(w http.ResponseWriter, r *http.Request) {
 
 }
 
+type snippetForm struct {
+	Title       string
+	Content     string
+	Expires     int
+	FieldErrors map[string]string
+}
+
 func (app *application) snippetCreate(w http.ResponseWriter, r *http.Request) {
 	err := r.ParseForm()
 
@@ -68,6 +77,40 @@ func (app *application) snippetCreate(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
+	// map to hold validation errors
+	fieldErrors := make(map[string]string)
+
+	// title validation
+	if strings.TrimSpace(title) == "" {
+		fieldErrors["title"] = "This field cannot be blank"
+	} else if utf8.RuneCountInString(title) > 100 {
+		fieldErrors["title"] = "This field cannot be more than 100 characters long"
+	}
+
+	// content validation
+
+	if strings.TrimSpace(content) == "" {
+		fieldErrors["content"] = "This field cannot be blank"
+	}
+
+	if expires != 1 && expires != 7 && expires != 365 {
+		fieldErrors["expires"] = "This field must be equal 1, 7 or 365"
+	}
+
+	if len(fieldErrors) > 0 {
+
+		data := app.newTemplateData()
+		data.Form = &snippetForm{
+			Title:       title,
+			Content:     content,
+			Expires:     expires,
+			FieldErrors: fieldErrors,
+		}
+
+		app.render(w, http.StatusUnprocessableEntity, "create.go.tpl", data)
+		return
+	}
+
 	id, err := app.snippets.Insert(title, content, expires)
 	if err != nil {
 		app.serverError(w, err)
@@ -79,5 +122,8 @@ func (app *application) snippetCreate(w http.ResponseWriter, r *http.Request) {
 
 func (app *application) snippetCreateForm(w http.ResponseWriter, r *http.Request) {
 	data := app.newTemplateData()
+	data.Form = snippetForm{
+		Expires: 365,
+	}
 	app.render(w, http.StatusOK, "create.go.tpl", data)
 }
