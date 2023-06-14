@@ -18,6 +18,10 @@
     </header>
     {{template "nav" .}}
     <main>
+        {{with .Flash}}
+            <div class="flash">{{.}}</div>
+        {{end}}
+
         {{template "main" .}}
     </main>
     <footer>Powered by <a href='https://golang.org/'>Go</a> © {{.CurrentYear}}</footer>
