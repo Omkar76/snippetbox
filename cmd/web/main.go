@@ -70,7 +70,7 @@ func main() {
 		Handler:  mux,
 	}
 
-	err = server.ListenAndServe()
+	err = server.ListenAndServeTLS("./tls/cert.pem", "./tls/key.pem")
 	errorLog.Fatal(err)
 }
 
